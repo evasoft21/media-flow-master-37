@@ -8,7 +8,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string, rememberMe?: boolean) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<boolean>;
   signup: (email: string, password: string, confirmPassword: string, name?: string) => Promise<boolean>;
   logout: () => Promise<void>;
 }
@@ -33,26 +33,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // If token is invalid or expired, clear it
         localStorage.removeItem('authToken');
         localStorage.removeItem('currentUser');
-        // For development, we can use the mock user
-        if (process.env.NODE_ENV === 'development') {
-          // Add mock user data for development purposes
-          const mockUser: User = {
-            id: 'mock-user-1',
-            name: 'Demo User',
-            email: 'user@example.com',
-            role: 'user',
-            plan: 'Pro',
-            avatarUrl: null,
-            createdAt: new Date().toISOString(),
-            lastLogin: new Date().toISOString()
-          };
-          
-          // Save mock user to localStorage
-          localStorage.setItem('currentUser', JSON.stringify(mockUser));
-          localStorage.setItem('authToken', 'mock-token-for-development');
-          
-          setUser(mockUser);
-        }
       } finally {
         setIsLoading(false);
       }
@@ -61,10 +41,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkAuthStatus();
   }, []);
 
-  const login = async (email: string, password: string, rememberMe: boolean = false): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const response = await api.loginUser({ email, password, rememberMe });
+      const response = await api.loginUser({ email, password });
       setUser(response.user);
       return true;
     } catch (error) {

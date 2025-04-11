@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader2, DollarSign, Settings, Mail, FileText, Cookie, Phone } from 'lucide-react';
 import { api } from '@/api/mockApi';
 import { useApiRequest } from '@/api/mockApi';
-import { ContactInfo, StripeConfig } from '@/types/api';
+import { StripeConfig } from '@/types/api';
 
 const AdminSettingsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState("general");
@@ -26,7 +26,7 @@ const AdminSettingsPage: React.FC = () => {
   const [termsContent, setTermsContent] = useState('');
   const [privacyContent, setPrivacyContent] = useState('');
   const [cookieContent, setCookieContent] = useState('');
-  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+  const [contactInfo, setContactInfo] = useState<any>(null);
   const [stripeConfig, setStripeConfig] = useState<StripeConfig | null>(null);
   
   // Fetch Terms of Service
@@ -216,7 +216,6 @@ const AdminSettingsPage: React.FC = () => {
   // Handle saving Contact Info
   const handleSaveContactInfo = async () => {
     try {
-      if (!contactInfo) return;
       const response = await api.updateContactInfo(contactInfo);
       if (response.success) {
         toast({
@@ -235,13 +234,10 @@ const AdminSettingsPage: React.FC = () => {
   
   // Handle contact form field changes
   const handleContactChange = (field: string, value: string) => {
-    setContactInfo(prev => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        [field]: value
-      };
-    });
+    setContactInfo(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
   
   // Handle Stripe config field changes
@@ -347,7 +343,6 @@ const AdminSettingsPage: React.FC = () => {
 
         <div className="flex-1">
           <Tabs value={activeTab} className="space-y-4" onValueChange={setActiveTab}>
-            
             <TabsContent value="general">
               <Card>
                 <CardHeader>

@@ -1,470 +1,400 @@
 
-import { type User, type SubscriptionPlan, type Invoice, type DownloadRecord, type AdminStats } from "@/types/api";
-import { API_BASE_URL, ApiError, getCommonHeaders } from "../types";
+import React from 'react';
+import { adminStats, mockUsersList, mockPlans, mockInvoices, mockDownloads } from "../data/adminData";
+import { type User, type SubscriptionPlan, type Invoice, type DownloadRecord } from "@/types/api";
+import { delay, createApiError } from "../utils/apiHelpers";
 import { getAuthToken } from "../utils/storageHelpers";
 
 export const adminService = {
   // Get admin dashboard statistics
-  getAdminStats: async (): Promise<AdminStats> => {
+  getAdminStats: async () => {
+    // Check authentication
     const token = getAuthToken();
     if (!token) {
-      throw new ApiError(401, 'Not authenticated');
+      throw createApiError(401, 'Not authenticated');
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/admin/stats?token=${token}`, {
-        headers: getCommonHeaders()
-      });
+    // Simulate API delay
+    await delay(800);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new ApiError(response.status, errorData.detail || 'Failed to fetch admin statistics');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(500, 'An unexpected error occurred while fetching admin statistics');
-    }
+    // Return mock statistics
+    return adminStats;
   },
 
   // Get list of users (with pagination)
   getUsers: async ({ page = 1, limit = 10 }: { page?: number; limit?: number }) => {
+    // Check authentication
     const token = getAuthToken();
     if (!token) {
-      throw new ApiError(401, 'Not authenticated');
+      throw createApiError(401, 'Not authenticated');
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/admin/users?page=${page}&limit=${limit}&token=${token}`, {
-        headers: getCommonHeaders()
-      });
+    // Simulate API delay
+    await delay(600);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new ApiError(response.status, errorData.detail || 'Failed to fetch users');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(500, 'An unexpected error occurred while fetching users');
-    }
+    // Paginate users
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const paginatedUsers = mockUsersList.slice(startIndex, endIndex);
+    
+    return {
+      users: paginatedUsers,
+      totalCount: mockUsersList.length,
+      page,
+      limit,
+      totalPages: Math.ceil(mockUsersList.length / limit)
+    };
   },
 
   // Get a single user by ID
   getUserById: async (userId: string): Promise<User> => {
+    // Check authentication
     const token = getAuthToken();
     if (!token) {
-      throw new ApiError(401, 'Not authenticated');
+      throw createApiError(401, 'Not authenticated');
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/admin/users/${userId}?token=${token}`, {
-        headers: getCommonHeaders()
-      });
+    // Simulate API delay
+    await delay(500);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new ApiError(response.status, errorData.detail || 'User not found');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(500, 'An unexpected error occurred while fetching user details');
+    // Find user by ID
+    const user = mockUsersList.find(user => user.id === userId);
+    
+    if (!user) {
+      throw createApiError(404, 'User not found');
     }
+
+    return user;
   },
   
   // Add a new user
   addUser: async ({ name, email, plan }: { name: string; email: string; plan: "Free" | "Pro" | "Unlimited" }): Promise<User> => {
+    // Check authentication
     const token = getAuthToken();
     if (!token) {
-      throw new ApiError(401, 'Not authenticated');
+      throw createApiError(401, 'Not authenticated');
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/admin/users`, {
-        method: 'POST',
-        headers: getCommonHeaders(),
-        body: JSON.stringify({ name, email, plan })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new ApiError(response.status, errorData.detail || 'Failed to add user');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(500, 'An unexpected error occurred while adding user');
+    // Simulate API delay
+    await delay(800);
+    
+    // Check if email is already in use
+    const existingUser = mockUsersList.find(user => user.email.toLowerCase() === email.toLowerCase());
+    if (existingUser) {
+      throw createApiError(409, 'Email is already in use');
     }
+    
+    // Create new user (in a real app, this would save to database)
+    const newUser: User = {
+      id: `${mockUsersList.length + 1}`,
+      name,
+      email,
+      plan,
+      downloads: [],
+      downloadCount: 0,
+      registrationDate: new Date().toISOString()
+    };
+    
+    // In a real app, this would update the database
+    // Here we just return the new user
+    return newUser;
   },
   
   // Delete a user
   deleteUser: async (userId: string): Promise<{ success: boolean }> => {
+    // Check authentication
     const token = getAuthToken();
     if (!token) {
-      throw new ApiError(401, 'Not authenticated');
+      throw createApiError(401, 'Not authenticated');
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/admin/users/${userId}?token=${token}`, {
-        method: 'DELETE',
-        headers: getCommonHeaders()
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new ApiError(response.status, errorData.detail || 'Failed to delete user');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(500, 'An unexpected error occurred while deleting user');
+    // Simulate API delay
+    await delay(700);
+    
+    // In a real application, this would delete the user from the database
+    // Here we just return success if the user exists
+    const userExists = mockUsersList.some(user => user.id === userId);
+    
+    if (!userExists) {
+      throw createApiError(404, 'User not found');
     }
+    
+    return { success: true };
   },
   
   // Get all subscription plans
   getSubscriptionPlans: async (): Promise<SubscriptionPlan[]> => {
+    // Check authentication
     const token = getAuthToken();
     if (!token) {
-      throw new ApiError(401, 'Not authenticated');
+      throw createApiError(401, 'Not authenticated');
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/admin/plans?token=${token}`, {
-        headers: getCommonHeaders()
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new ApiError(response.status, errorData.detail || 'Failed to fetch subscription plans');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(500, 'An unexpected error occurred while fetching subscription plans');
-    }
+    // Simulate API delay
+    await delay(600);
+    
+    return mockPlans;
   },
   
   // Get a single plan by ID
   getPlanById: async (planId: string): Promise<SubscriptionPlan> => {
+    // Check authentication
     const token = getAuthToken();
     if (!token) {
-      throw new ApiError(401, 'Not authenticated');
+      throw createApiError(401, 'Not authenticated');
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/admin/plans/${planId}?token=${token}`, {
-        headers: getCommonHeaders()
-      });
+    // Simulate API delay
+    await delay(500);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new ApiError(response.status, errorData.detail || 'Plan not found');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(500, 'An unexpected error occurred while fetching plan details');
+    // Find plan by ID
+    const plan = mockPlans.find(plan => plan.id === planId);
+    
+    if (!plan) {
+      throw createApiError(404, 'Plan not found');
     }
+
+    return plan;
   },
   
   // Create a new plan
   createPlan: async (planData: Omit<SubscriptionPlan, 'id' | 'createdAt' | 'updatedAt'>): Promise<SubscriptionPlan> => {
+    // Check authentication
     const token = getAuthToken();
     if (!token) {
-      throw new ApiError(401, 'Not authenticated');
+      throw createApiError(401, 'Not authenticated');
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/admin/plans`, {
-        method: 'POST',
-        headers: getCommonHeaders(),
-        body: JSON.stringify(planData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new ApiError(response.status, errorData.detail || 'Failed to create plan');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(500, 'An unexpected error occurred while creating plan');
-    }
+    // Simulate API delay
+    await delay(800);
+    
+    // In a real application, this would create a new plan in the database
+    // Here we just generate a new ID and return the plan data
+    const newPlan: SubscriptionPlan = {
+      ...planData,
+      id: `${mockPlans.length + 1}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    return newPlan;
   },
   
   // Update an existing plan
   updatePlan: async (planId: string, planData: Partial<Omit<SubscriptionPlan, 'id' | 'createdAt' | 'updatedAt'>>): Promise<SubscriptionPlan> => {
+    // Check authentication
     const token = getAuthToken();
     if (!token) {
-      throw new ApiError(401, 'Not authenticated');
+      throw createApiError(401, 'Not authenticated');
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/admin/plans/${planId}`, {
-        method: 'PUT',
-        headers: getCommonHeaders(),
-        body: JSON.stringify(planData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new ApiError(response.status, errorData.detail || 'Failed to update plan');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(500, 'An unexpected error occurred while updating plan');
+    // Simulate API delay
+    await delay(700);
+    
+    // Find plan by ID
+    const plan = mockPlans.find(plan => plan.id === planId);
+    
+    if (!plan) {
+      throw createApiError(404, 'Plan not found');
     }
+    
+    // In a real application, this would update the plan in the database
+    // Here we just return the updated plan data
+    const updatedPlan: SubscriptionPlan = {
+      ...plan,
+      ...planData,
+      updatedAt: new Date().toISOString()
+    };
+    
+    return updatedPlan;
   },
   
   // Delete a plan
   deletePlan: async (planId: string): Promise<{ success: boolean }> => {
+    // Check authentication
     const token = getAuthToken();
     if (!token) {
-      throw new ApiError(401, 'Not authenticated');
+      throw createApiError(401, 'Not authenticated');
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/admin/plans/${planId}?token=${token}`, {
-        method: 'DELETE',
-        headers: getCommonHeaders()
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new ApiError(response.status, errorData.detail || 'Failed to delete plan');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(500, 'An unexpected error occurred while deleting plan');
+    // Simulate API delay
+    await delay(700);
+    
+    // In a real application, this would delete the plan from the database
+    // Here we just return success if the plan exists
+    const planExists = mockPlans.some(plan => plan.id === planId);
+    
+    if (!planExists) {
+      throw createApiError(404, 'Plan not found');
     }
+    
+    return { success: true };
   },
   
   // Get invoice history (with pagination)
   getInvoices: async ({ page = 1, limit = 10 }: { page?: number; limit?: number }) => {
+    // Check authentication
     const token = getAuthToken();
     if (!token) {
-      throw new ApiError(401, 'Not authenticated');
+      throw createApiError(401, 'Not authenticated');
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/admin/invoices?page=${page}&limit=${limit}&token=${token}`, {
-        headers: getCommonHeaders()
-      });
+    // Simulate API delay
+    await delay(600);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new ApiError(response.status, errorData.detail || 'Failed to fetch invoices');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(500, 'An unexpected error occurred while fetching invoices');
-    }
+    // Paginate invoices
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const paginatedInvoices = mockInvoices.slice(startIndex, endIndex);
+    
+    return {
+      invoices: paginatedInvoices,
+      totalCount: mockInvoices.length,
+      page,
+      limit,
+      totalPages: Math.ceil(mockInvoices.length / limit)
+    };
   },
   
   // Get download records (with pagination)
   getDownloads: async ({ page = 1, limit = 10 }: { page?: number; limit?: number }) => {
+    // Check authentication
     const token = getAuthToken();
     if (!token) {
-      throw new ApiError(401, 'Not authenticated');
+      throw createApiError(401, 'Not authenticated');
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/admin/downloads?page=${page}&limit=${limit}&token=${token}`, {
-        headers: getCommonHeaders()
-      });
+    // Simulate API delay
+    await delay(600);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new ApiError(response.status, errorData.detail || 'Failed to fetch downloads');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(500, 'An unexpected error occurred while fetching downloads');
-    }
+    // Paginate downloads
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const paginatedDownloads = mockDownloads.slice(startIndex, endIndex);
+    
+    return {
+      downloads: paginatedDownloads,
+      totalCount: mockDownloads.length,
+      page,
+      limit,
+      totalPages: Math.ceil(mockDownloads.length / limit)
+    };
   },
 
   // Get a single invoice by ID
   getInvoiceById: async (invoiceId: string): Promise<Invoice> => {
+    // Check authentication
     const token = getAuthToken();
     if (!token) {
-      throw new ApiError(401, 'Not authenticated');
+      throw createApiError(401, 'Not authenticated');
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/admin/invoices/${invoiceId}?token=${token}`, {
-        headers: getCommonHeaders()
-      });
+    // Simulate API delay
+    await delay(500);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new ApiError(response.status, errorData.detail || 'Invoice not found');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(500, 'An unexpected error occurred while fetching invoice details');
+    // Find invoice by ID
+    const invoice = mockInvoices.find(invoice => invoice.id === invoiceId);
+    
+    if (!invoice) {
+      throw createApiError(404, 'Invoice not found');
     }
+
+    return invoice;
   },
 
   // Get a single download by ID
   getDownloadById: async (downloadId: string): Promise<DownloadRecord> => {
+    // Check authentication
     const token = getAuthToken();
     if (!token) {
-      throw new ApiError(401, 'Not authenticated');
+      throw createApiError(401, 'Not authenticated');
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/admin/downloads/${downloadId}?token=${token}`, {
-        headers: getCommonHeaders()
-      });
+    // Simulate API delay
+    await delay(500);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new ApiError(response.status, errorData.detail || 'Download record not found');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(500, 'An unexpected error occurred while fetching download details');
+    // Find download by ID
+    const download = mockDownloads.find(download => download.id === downloadId);
+    
+    if (!download) {
+      throw createApiError(404, 'Download record not found');
     }
+
+    return download;
   },
 
   // Export downloads data
   exportDownloads: async (format: 'csv' | 'json' = 'csv'): Promise<Blob> => {
+    // Check authentication
     const token = getAuthToken();
     if (!token) {
-      throw new ApiError(401, 'Not authenticated');
+      throw createApiError(401, 'Not authenticated');
     }
 
-    try {
-      // This would be a real API call in a production app
-      // For now, we'll create a simple blob with mock data
-      let content: string;
-      let mimeType: string;
-      
-      if (format === 'csv') {
-        content = "id,userId,userName,videoUrl,downloadDate,fileSize,resolution,format\n";
-        content += "dl-001,user-1,John Doe,https://example.com/video1,2023-05-05T08:30:00Z,35.4 MB,1080p,MP4\n";
-        mimeType = 'text/csv';
-      } else {
-        content = JSON.stringify([{
-          id: "dl-001",
-          userId: "user-1",
-          userName: "John Doe",
-          videoUrl: "https://example.com/video1",
-          downloadDate: "2023-05-05T08:30:00Z",
-          fileSize: "35.4 MB",
-          resolution: "1080p",
-          format: "MP4"
-        }], null, 2);
-        mimeType = 'application/json';
-      }
-      
-      return new Blob([content], { type: mimeType });
-    } catch (error) {
-      throw new ApiError(500, 'An unexpected error occurred while exporting download data');
+    // Simulate API delay
+    await delay(1000);
+    
+    // In a real application, this would generate a properly formatted file
+    // Here we're just converting the mock data to the requested format
+    
+    let content: string;
+    let mimeType: string;
+    
+    if (format === 'csv') {
+      // Convert data to CSV
+      const header = Object.keys(mockDownloads[0]).join(',');
+      const rows = mockDownloads.map(item => Object.values(item).join(','));
+      content = [header, ...rows].join('\n');
+      mimeType = 'text/csv';
+    } else {
+      // JSON format
+      content = JSON.stringify(mockDownloads, null, 2);
+      mimeType = 'application/json';
     }
+    
+    return new Blob([content], { type: mimeType });
   },
 
   // Export invoice data
   exportInvoice: async (invoiceId: string, format: 'pdf' | 'csv' | 'json' = 'pdf'): Promise<Blob> => {
+    // Check authentication
     const token = getAuthToken();
     if (!token) {
-      throw new ApiError(401, 'Not authenticated');
+      throw createApiError(401, 'Not authenticated');
     }
 
-    try {
-      // This would be a real API call in a production app
-      // For now, we'll create a simple blob with mock data
-      let content: string;
-      let mimeType: string;
-      
-      if (format === 'pdf') {
-        content = `INVOICE #${invoiceId}\n\nDate: 2023-05-01T10:30:00Z\nCustomer: John Doe\nEmail: john.doe@example.com\nPlan: Pro\nAmount: $9.99\nStatus: Paid`;
-        mimeType = 'application/pdf';
-      } else if (format === 'csv') {
-        content = "id,userId,userName,userEmail,planName,amount,currency,createdAt,status\n";
-        content += `${invoiceId},user-1,John Doe,john.doe@example.com,Pro,9.99,USD,2023-05-01T10:30:00Z,Paid\n`;
-        mimeType = 'text/csv';
-      } else {
-        content = JSON.stringify({
-          id: invoiceId,
-          userId: "user-1",
-          userName: "John Doe",
-          userEmail: "john.doe@example.com",
-          planName: "Pro",
-          amount: 9.99,
-          currency: "USD",
-          createdAt: "2023-05-01T10:30:00Z",
-          status: "Paid"
-        }, null, 2);
-        mimeType = 'application/json';
-      }
-      
-      return new Blob([content], { type: mimeType });
-    } catch (error) {
-      throw new ApiError(500, 'An unexpected error occurred while exporting invoice data');
+    // Simulate API delay
+    await delay(800);
+    
+    // Find invoice by ID
+    const invoice = mockInvoices.find(invoice => invoice.id === invoiceId);
+    
+    if (!invoice) {
+      throw createApiError(404, 'Invoice not found');
     }
+    
+    // In a real application, this would generate a properly formatted file
+    // Here we're just converting the mock data to the requested format
+    
+    let content: string;
+    let mimeType: string;
+    
+    if (format === 'pdf') {
+      // Mock PDF content (just text for demo)
+      content = `INVOICE #${invoice.id}\n\nDate: ${invoice.createdAt}\nCustomer: ${invoice.userName}\nEmail: ${invoice.userEmail}\nPlan: ${invoice.planName}\nAmount: $${invoice.amount}\nStatus: ${invoice.status}`;
+      mimeType = 'application/pdf';
+    } else if (format === 'csv') {
+      // Convert data to CSV
+      const header = Object.keys(invoice).join(',');
+      const row = Object.values(invoice).join(',');
+      content = [header, row].join('\n');
+      mimeType = 'text/csv';
+    } else {
+      // JSON format
+      content = JSON.stringify(invoice, null, 2);
+      mimeType = 'application/json';
+    }
+    
+    return new Blob([content], { type: mimeType });
   }
 };

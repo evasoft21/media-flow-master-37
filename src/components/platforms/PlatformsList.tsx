@@ -1,17 +1,10 @@
 
-import { useQuery } from '@tanstack/react-query';
-import { api } from '@/api/mockApi';
+import { platforms } from '@/api/mockData';
 import { Youtube, Facebook, Video, Music, Twitter, Image } from 'lucide-react';
-import { type Platform } from '@/types/api';
 
 export const PlatformsList = () => {
-  const { data: platforms = [] } = useQuery({
-    queryKey: ['platforms'],
-    queryFn: () => api.getPlatforms(),
-  });
-
-  const getPlatformIcon = (platformName: string) => {
-    switch (platformName) {
+  const getPlatformIcon = (platform: string) => {
+    switch (platform) {
       case 'YouTube':
         return <Youtube className="h-6 w-6 text-red-500" />;
       case 'Facebook':
@@ -33,13 +26,13 @@ export const PlatformsList = () => {
     <div className="w-full max-w-3xl mx-auto">
       <h2 className="text-xl font-semibold mb-6 text-center">Supported Platforms</h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-        {platforms.map((platform: Platform) => (
+        {platforms.map((platform) => (
           <div
-            key={platform.id}
+            key={platform}
             className="flex flex-col items-center justify-center p-4 rounded-lg bg-card/50 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all card-hover"
           >
-            {getPlatformIcon(platform.name)}
-            <span className="mt-2 text-sm font-medium">{platform.name}</span>
+            {getPlatformIcon(platform)}
+            <span className="mt-2 text-sm font-medium">{platform}</span>
           </div>
         ))}
       </div>

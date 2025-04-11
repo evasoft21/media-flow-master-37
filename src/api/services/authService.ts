@@ -1,104 +1,91 @@
 
 import { type LoginRequest, type SignupRequest, type AuthResponse, type User } from "@/types/api";
+import { delay, simulateRandomFailure, createApiError } from "../utils/apiHelpers";
 import { saveAuthToken, saveCurrentUser, getCurrentUser, getAuthToken, clearAuthToken } from "../utils/storageHelpers";
-import { API_BASE_URL, ApiError, getCommonHeaders } from "../types";
+import { mockUser } from "../data";
 
 export const authService = {
   // Login user
   loginUser: async (credentials: LoginRequest): Promise<AuthResponse> => {
     if (!credentials.email || !credentials.password) {
-      throw new ApiError(400, 'Email and password are required');
+      throw createApiError(400, 'Email and password are required');
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(credentials)
-      });
+    // Simulate API delay
+    await delay(1000);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new ApiError(response.status, errorData.detail || 'Login failed');
-      }
-
-      const data = await response.json();
-      
-      // Save auth data
-      saveAuthToken(data.token, credentials.rememberMe);
-      saveCurrentUser(data.user);
-
-      return data;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(500, 'An unexpected error occurred during login');
+    // Simulate validation
+    if (credentials.email !== 'user@example.com') {
+      throw createApiError(401, 'Invalid email or password');
     }
+
+    if (credentials.password !== 'password') {
+      throw createApiError(401, 'Invalid email or password');
+    }
+
+    // Create mock token
+    const token = `mock-jwt-token-${Date.now()}`;
+    saveAuthToken(token);
+    saveCurrentUser(mockUser);
+
+    return {
+      token,
+      user: mockUser
+    };
   },
 
   // Signup user
   signupUser: async (signupData: SignupRequest): Promise<AuthResponse> => {
+    // Validate input
     if (!signupData.email || !signupData.password || !signupData.confirmPassword) {
-      throw new ApiError(400, 'All fields are required');
+      throw createApiError(400, 'All fields are required');
     }
 
     if (signupData.password !== signupData.confirmPassword) {
-      throw new ApiError(400, 'Passwords do not match', {
+      throw createApiError(400, 'Passwords do not match', {
         confirmPassword: ['Passwords do not match']
       });
     }
 
     if (signupData.password.length < 6) {
-      throw new ApiError(400, 'Password must be at least 6 characters', {
+      throw createApiError(400, 'Password must be at least 6 characters', {
         password: ['Password must be at least 6 characters']
       });
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(signupData)
-      });
+    // Simulate API delay
+    await delay(1500);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new ApiError(response.status, errorData.detail || 'Registration failed');
-      }
-
-      const data = await response.json();
-      
-      // Save auth data
-      saveAuthToken(data.token);
-      saveCurrentUser(data.user);
-
-      return data;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(500, 'An unexpected error occurred during registration');
+    // Simulate existing user check
+    if (signupData.email === 'user@example.com' && simulateRandomFailure(0.8)) {
+      throw createApiError(409, 'User already exists with this email');
     }
+
+    // Create new user
+    const newUser: User = {
+      ...mockUser,
+      email: signupData.email,
+      name: signupData.name || signupData.email.split('@')[0],
+      registrationDate: new Date().toISOString()
+    };
+
+    // Create mock token
+    const token = `mock-jwt-token-${Date.now()}`;
+    saveAuthToken(token);
+    saveCurrentUser(newUser);
+
+    return {
+      token,
+      user: newUser
+    };
   },
 
   // Logout user
   logoutUser: async (): Promise<void> => {
-    try {
-      await fetch(`${API_BASE_URL}/auth/logout`, {
-        method: 'POST',
-        headers: getCommonHeaders()
-      });
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      // Always clear token regardless of API response
-      clearAuthToken();
-    }
+    // Simulate API delay
+    await delay(500);
+    
+    clearAuthToken();
   },
 
   // Get current user
@@ -106,33 +93,17 @@ export const authService = {
     const token = getAuthToken();
     
     if (!token) {
-      // Return a mock user for development purposes instead of throwing an error
-      // In production, you'd handle this differently
-      const localUser = getCurrentUser();
-      if (localUser) {
-        return localUser;
-      }
-      
-      throw new ApiError(401, 'Not authenticated');
+      throw createApiError(401, 'Not authenticated');
     }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
-        headers: getCommonHeaders()
-      });
+    // Simulate API delay
+    await delay(800);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new ApiError(response.status, errorData.detail || 'Failed to get user information');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(500, 'An unexpected error occurred while fetching user data');
+    const user = getCurrentUser();
+    if (!user) {
+      throw createApiError(404, 'User not found');
     }
+
+    return user;
   }
 };

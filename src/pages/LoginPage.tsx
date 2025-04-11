@@ -6,13 +6,11 @@ import { DownloadCloud, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -48,7 +46,7 @@ const LoginPage = () => {
     
     if (!validateForm()) return;
     
-    const success = await login(email, password, rememberMe);
+    const success = await login(email, password);
     if (success) {
       navigate('/dashboard');
     }
@@ -102,17 +100,6 @@ const LoginPage = () => {
             {errors.password && (
               <p className="text-sm text-destructive">{errors.password}</p>
             )}
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="remember-me" 
-              checked={rememberMe}
-              onCheckedChange={(checked) => setRememberMe(checked === true)}
-            />
-            <Label htmlFor="remember-me" className="text-sm font-normal cursor-pointer">
-              Remember me
-            </Label>
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>

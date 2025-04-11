@@ -1,137 +1,180 @@
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  registrationDate: string;
-  plan: "Free" | "Pro" | "Unlimited";
-  downloads: DownloadRecord[];
-  downloadCount: number;
-}
-
-export interface DownloadRecord {
-  id: string;
-  userId: string;
-  userName: string;
-  videoUrl: string;
-  downloadDate: string;
-  fileSize: string;
-  resolution: string;
-  format: string;
-  status?: string;
-}
-
-export interface SubscriptionPlan {
-  id: string;
-  name: string;
-  price: number;
-  currency: string;
-  description: string;
-  features: string[];
-  isRecommended?: boolean;
-  createdAt: string;
-  updatedAt: string;
-  isActive?: boolean;
-  billingCycle?: "monthly" | "annually";
-}
-
-export interface Invoice {
-  id: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  planName: string;
-  amount: number;
-  currency: string;
-  createdAt: string;
-  status: 'Paid' | 'Pending' | 'Failed';
-  paymentMethod?: string;
-  transactionId?: string;
-}
-
-export interface AdminStats {
-  totalUsers: number;
-  activeUsers: number;
-  newUsersThisMonth: number;
-  totalDownloads: number;
-  totalRevenue: number;
-  averageDownloadsPerUser: number;
-}
-
-export interface ApiError {
-  status: number;
-  message: string;
-  details?: any;
-}
-
-export interface ApiResponse<T> {
+// API Response Types
+export type ApiResponse<T> = {
   data: T;
   success: boolean;
   message?: string;
-}
+};
 
-export interface LoginRequest {
+// API Error Type
+export type ApiError = {
+  statusCode: number;
+  message: string;
+  errors?: Record<string, string[]>;
+};
+
+// Authentication Types
+export type LoginRequest = {
   email: string;
   password: string;
-  rememberMe?: boolean;
-}
+};
 
-export interface SignupRequest {
+export type SignupRequest = {
   email: string;
   password: string;
   confirmPassword: string;
   name?: string;
-}
+};
 
-export interface AuthResponse {
+export type AuthResponse = {
   token: string;
   user: User;
-}
+};
 
-export interface VideoInfo {
+// User Types
+export type User = {
   id: string;
-  title: string;
-  author: string;
-  duration: number;
-  thumbnail: string;
-  formats: VideoFormat[];
-  platform?: string;
-  viewCount?: number;
-}
-
-export interface VideoFormat {
-  id: string;
-  format: string;
-  quality: string;
-  url: string;
-  fileSize?: string;
-}
-
-export interface Platform {
-  id: string;
+  email: string;
   name: string;
-  url: string;
-  icon: string;
-  isActive: boolean;
-}
+  plan: string;
+  downloads: UserDownload[];
+  downloadCount: number;
+  registrationDate: string;
+};
 
-export interface Feature {
+// Download Types
+export type Platform = 'YouTube' | 'TikTok' | 'Facebook' | 'Instagram' | 'Twitter' | 'Vimeo';
+
+export type VideoQuality = '240p' | '360p' | '480p' | '720p' | '1080p' | '2K' | '4K';
+
+export type VideoInfo = {
+  id: string;
+  url: string;
+  title: string;
+  description: string;
+  thumbnailUrl: string;
+  platform: Platform;
+  author: string;
+  duration: string;
+  viewCount: string;
+  availableFormats: VideoFormat[];
+};
+
+export type VideoFormat = {
+  id: string;
+  label: string;
+  quality: VideoQuality;
+  format: string;
+  fileSize: string;
+};
+
+export type UserDownload = {
+  id: string;
+  videoInfo: VideoInfo;
+  downloadDate: string;
+  format: VideoFormat;
+  status: 'completed' | 'failed';
+};
+
+// Content Types
+export type Feature = {
   id: string;
   title: string;
   description: string;
   icon: string;
-  isActive: boolean;
-}
+};
 
-export interface FAQItem {
+export type PricingPlan = {
+  id: string;
+  name: string;
+  price: string;
+  billingPeriod: string;
+  description: string;
+  features: string[];
+  isPopular?: boolean;
+  downloadLimit: number | 'unlimited';
+  qualityLimit: string;
+  platformLimit?: 'all' | string[];
+};
+
+export type FAQItem = {
   id: string;
   question: string;
   answer: string;
+};
+
+// Admin Types
+export type SubscriptionPlan = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  billingCycle: 'monthly' | 'annually';
+  features: string[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Invoice = {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  planId: string;
+  planName: string;
+  amount: number;
+  status: 'paid' | 'pending' | 'failed' | 'refunded';
+  paymentMethod: 'credit_card' | 'paypal' | 'bank_transfer';
+  transactionId: string;
+  createdAt: string;
+};
+
+export type DownloadRecord = {
+  id: string;
+  userId: string;
+  userName: string;
+  videoTitle: string;
+  platform: string;
+  quality: string;
+  fileSize: string;
+  downloadDate: string;
+  status: 'completed' | 'failed';
+};
+
+// Style Configuration Types
+export type SocialMediaConfig = {
+  id: string;
+  platform: 'Facebook' | 'Instagram' | 'Twitter' | 'LinkedIn' | 'YouTube';
+  url: string;
+  isActive: boolean;
+  icon: string;
+};
+
+export type ColorScheme = {
+  id: string;
+  name: string;
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+  backgroundColor: string;
+  textColor: string;
+  isDarkMode: boolean;
+};
+
+export type LandingPageSection = {
+  id: string;
+  title: string;
+  subtitle?: string;
+  content: string;
   order: number;
   isActive: boolean;
-}
+  imageUrl?: string;
+  buttonText?: string;
+  buttonUrl?: string;
+};
 
-export interface SiteConfig {
+export type SiteConfig = {
   id: string;
   siteName: string;
   siteDescription: string;
@@ -142,54 +185,13 @@ export interface SiteConfig {
   landingSections: LandingPageSection[];
   faqItems: FAQItem[];
   lastUpdated: string;
-}
+};
 
-export interface ColorScheme {
-  id: string;
-  name: string;
-  primaryColor: string;
-  secondaryColor: string;
-  accentColor: string;
-  backgroundColor: string;
-  textColor: string;
-  isDarkMode: boolean;
-}
-
-export interface SocialMediaConfig {
-  id: string;
-  platform: string;
-  url: string;
-  isActive: boolean;
-  icon: string;
-}
-
-export interface LandingPageSection {
-  id: string;
-  title: string;
-  subtitle?: string;
-  content: string;
-  order: number;
-  isActive: boolean;
-  imageUrl?: string;
-  buttonText?: string;
-  buttonUrl?: string;
-}
-
-export interface ContactInfo {
-  id: string;
-  companyName: string;
-  address: string;
-  email: string;
-  phone: string;
-  supportHours: string;
-  formSubmissionEmail: string;
-  lastUpdated: string;
-}
-
-export interface StripeConfig {
-  id: string;
+// Payment and Stripe Types
+export type StripeConfig = {
   publishableKey: string;
   webhookSecret: string;
+  enabledPaymentMethods: string[];
   testMode: boolean;
   successUrl: string;
   cancelUrl: string;
@@ -197,15 +199,9 @@ export interface StripeConfig {
   collectBillingAddress: boolean;
   collectShippingAddress: boolean;
   lastUpdated: string;
-}
+};
 
-export interface LegalDocument {
-  title: string;
-  content: string;
-  lastUpdated: string;
-}
-
-export interface PaymentSession {
+export type PaymentSession = {
   id: string;
   customerId: string;
   customerEmail: string;
@@ -215,12 +211,20 @@ export interface PaymentSession {
   createdAt: string;
   paymentMethod: string;
   planId: string;
-}
+};
 
-export interface UserDownload {
-  id: string;
-  videoInfo: VideoInfo;
-  downloadDate: string;
-  format: VideoFormat;
-  status: string;
-}
+// Legal Content Types
+export type LegalDocument = {
+  title: string;
+  content: string;
+  lastUpdated: string;
+};
+
+export type ContactInfo = {
+  companyName: string;
+  address: string;
+  email: string;
+  phone: string;
+  supportHours: string;
+  formSubmissionEmail: string;
+};

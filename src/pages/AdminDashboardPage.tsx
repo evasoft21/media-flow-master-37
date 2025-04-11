@@ -35,28 +35,28 @@ const AdminDashboardPage: React.FC = () => {
             <>
               <StatCard
                 title="Total Users"
-                value={(stats?.totalUsers || 0).toLocaleString()}
+                value={stats?.totalUsers.toLocaleString() || '0'}
                 icon={Users}
                 description="Total registered users"
                 trend={{ value: 12, isPositive: true }}
               />
               <StatCard
                 title="Total Downloads"
-                value={(stats?.totalDownloads || 0).toLocaleString()}
+                value={stats?.totalDownloads.toLocaleString() || '0'}
                 icon={Download}
                 description="All time downloads"
                 trend={{ value: 8, isPositive: true }}
               />
               <StatCard
                 title="Active Users"
-                value={(stats?.activeUsers || 0).toLocaleString()}
+                value={stats?.activeUsers.toLocaleString() || '0'}
                 icon={UserCheck}
                 description="Active in last 30 days"
                 trend={{ value: 5, isPositive: true }}
               />
               <StatCard
                 title="Premium Users"
-                value={(stats?.premiumUsers || 0).toLocaleString()}
+                value={stats?.premiumUsers.toLocaleString() || '0'}
                 icon={Crown}
                 description="Pro and Unlimited plans"
                 trend={{ value: 3, isPositive: false }}
