@@ -1,6 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
+import { PricingPlan } from '@/types/api';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,18 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import { useState } from 'react';
 
 type PricingCardProps = {
-  plan: {
-    id: string;
-    name: string;
-    price: string;
-    billingPeriod: string;
-    description: string;
-    features: string[];
-    isPopular?: boolean;
-    downloadLimit: number | string;
-    qualityLimit: string;
-    platformLimit?: string;
-  };
+  plan: PricingPlan;
 };
 
 export const PricingCard: React.FC<PricingCardProps> = ({ plan }) => {

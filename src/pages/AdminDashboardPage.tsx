@@ -9,40 +9,11 @@ import { api } from '@/api/mockApi';
 import { Users, Download, UserCheck, Crown } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
-type DownloadsByPlatform = {
-  [key: string]: number;
-};
-
-type DownloadsByDay = {
-  date: string;
-  count: number;
-}[];
-
 const AdminDashboardPage: React.FC = () => {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['adminStats'],
     queryFn: () => api.getAdminStats(),
   });
-
-  // Mock data for charts when actual data is not available
-  const mockDownloadsByPlatform: DownloadsByPlatform = {
-    YouTube: 1254,
-    TikTok: 873,
-    Facebook: 654,
-    Instagram: 421,
-    Twitter: 215,
-    Vimeo: 89
-  };
-
-  const mockDownloadsByDay: DownloadsByDay = [
-    { date: '2025-04-05', count: 142 },
-    { date: '2025-04-06', count: 165 },
-    { date: '2025-04-07', count: 187 },
-    { date: '2025-04-08', count: 156 },
-    { date: '2025-04-09', count: 198 },
-    { date: '2025-04-10', count: 224 },
-    { date: '2025-04-11', count: 178 }
-  ];
 
   return (
     <AdminLayout>
@@ -85,7 +56,7 @@ const AdminDashboardPage: React.FC = () => {
               />
               <StatCard
                 title="Premium Users"
-                value={(stats?.totalUsers * 0.3).toLocaleString() || '0'}
+                value={stats?.premiumUsers.toLocaleString() || '0'}
                 icon={Crown}
                 description="Pro and Unlimited plans"
                 trend={{ value: 3, isPositive: false }}
@@ -108,8 +79,8 @@ const AdminDashboardPage: React.FC = () => {
             </>
           ) : (
             <>
-              <DownloadsByPlatformChart data={mockDownloadsByPlatform} />
-              <DownloadsTrendChart data={mockDownloadsByDay} />
+              <DownloadsByPlatformChart data={stats?.downloadsByPlatform || {}} />
+              <DownloadsTrendChart data={stats?.downloadsByDay || []} />
             </>
           )}
         </div>

@@ -17,8 +17,7 @@ export const pricingPlans: PricingPlan[] = [
       'Standard processing speed'
     ],
     downloadLimit: 5,
-    qualityLimit: '720p',
-    platformLimit: 'limited'
+    qualityLimit: '720p'
   },
   {
     id: 'pro',

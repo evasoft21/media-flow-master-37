@@ -13,7 +13,7 @@ type VideoCardProps = {
 
 export const VideoCard: React.FC<VideoCardProps> = ({ videoInfo }) => {
   const [selectedFormat, setSelectedFormat] = useState<VideoFormat | null>(
-    videoInfo.formats.length > 0 ? videoInfo.formats[0] : null
+    videoInfo.availableFormats.length > 0 ? videoInfo.availableFormats[0] : null
   );
 
   const { execute: downloadVideo, isLoading } = useApiRequest(
@@ -38,7 +38,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ videoInfo }) => {
         {/* Thumbnail */}
         <div className="aspect-video relative overflow-hidden md:col-span-1">
           <img
-            src={videoInfo.thumbnail}
+            src={videoInfo.thumbnailUrl}
             alt={videoInfo.title}
             className="w-full h-full object-cover"
           />
@@ -50,8 +50,8 @@ export const VideoCard: React.FC<VideoCardProps> = ({ videoInfo }) => {
           <h3 className="text-lg font-semibold line-clamp-2 mb-2">{videoInfo.title}</h3>
           
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm mb-4">
-            <span className="text-muted-foreground">{Math.floor(videoInfo.duration / 60)}:{(videoInfo.duration % 60).toString().padStart(2, '0')}</span>
-            <span className="text-muted-foreground">{videoInfo.viewCount} views</span>
+            <span className="text-muted-foreground">{videoInfo.duration}</span>
+            <span className="text-muted-foreground">{videoInfo.viewCount}</span>
             <span className="text-muted-foreground">By: {videoInfo.author}</span>
           </div>
 
@@ -59,7 +59,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ videoInfo }) => {
           <div className="mb-4">
             <div className="text-sm font-medium mb-2">Select Format:</div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {videoInfo.formats.map((format) => (
+              {videoInfo.availableFormats.map((format) => (
                 <Button
                   key={format.id}
                   variant={selectedFormat?.id === format.id ? "default" : "outline"}

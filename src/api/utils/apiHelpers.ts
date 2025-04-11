@@ -11,6 +11,6 @@ export const simulateRandomFailure = (failureRate: number = 0.1): boolean => {
 };
 
 // API error response
-export const createApiError = (status: number, message: string, details?: any): ApiError => {
-  return { status, message, details };
+export const createApiError = (status: number, message: string, errors?: Record<string, string[]>): ApiError => {
+  return { status, message, errors };
 };

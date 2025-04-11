@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Trash2, GripVertical } from 'lucide-react';
 import { api } from '@/api/mockApi';
 import { toast } from '@/hooks/use-toast';
 import { v4 as uuidv4 } from 'uuid';
@@ -26,9 +26,7 @@ export const FaqConfig: React.FC<FaqConfigProps> = ({
     const newItem: FAQItem = {
       id: uuidv4(),
       question: '',
-      answer: '',
-      order: items.length + 1,
-      isActive: true
+      answer: ''
     };
     setItems([...items, newItem]);
   };
@@ -37,7 +35,7 @@ export const FaqConfig: React.FC<FaqConfigProps> = ({
     setItems(items.filter(item => item.id !== id));
   };
 
-  const handleUpdateItem = (id: string, field: keyof FAQItem, value: string | number | boolean) => {
+  const handleUpdateItem = (id: string, field: keyof FAQItem, value: string) => {
     setItems(prevItems => 
       prevItems.map(item => 
         item.id === id ? { ...item, [field]: value } : item
