@@ -1,5 +1,5 @@
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Header
 from models.user import LoginRequest, SignupRequest, AuthResponse, User
 from data.import_data import mock_user
 
@@ -75,9 +75,14 @@ async def logout():
     return {"success": True}
 
 @router.get("/me", response_model=User)
-async def get_current_user(token: str = None):
-    if not token or token not in tokens_db:
+async def get_current_user(authorization: str = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    token = authorization.replace("Bearer ", "")
+    
+    if token not in tokens_db:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
     
     email = tokens_db[token]
     if email not in users_db:

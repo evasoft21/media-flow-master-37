@@ -33,6 +33,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // If token is invalid or expired, clear it
         localStorage.removeItem('authToken');
         localStorage.removeItem('currentUser');
+        // For development, we can use the mock user
+        if (process.env.NODE_ENV === 'development') {
+          // Add mock user data for development purposes
+          const mockUser: User = {
+            id: 'mock-user-1',
+            name: 'Demo User',
+            email: 'user@example.com',
+            role: 'user',
+            plan: 'Pro',
+            avatarUrl: null,
+            createdAt: new Date().toISOString(),
+            lastLogin: new Date().toISOString()
+          };
+          
+          // Save mock user to localStorage
+          localStorage.setItem('currentUser', JSON.stringify(mockUser));
+          localStorage.setItem('authToken', 'mock-token-for-development');
+          
+          setUser(mockUser);
+        }
       } finally {
         setIsLoading(false);
       }
