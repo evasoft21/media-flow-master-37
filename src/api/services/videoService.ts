@@ -1,149 +1,96 @@
 
-import { type VideoInfo, type UserDownload } from "@/types/api";
-import { delay, simulateRandomFailure, createApiError } from "../utils/apiHelpers";
-import { getCurrentUser, saveCurrentUser, getAuthToken } from "../utils/storageHelpers";
-import { generateMockVideoInfo } from "../utils/videoInfoGenerator";
+import { type VideoInfo } from "@/types/api";
+import { API_BASE_URL, ApiError, getCommonHeaders } from "../types";
+import { getAuthToken } from "../utils/storageHelpers";
 
 export const videoService = {
   // Fetch video information from a URL
   fetchVideoInfo: async (url: string): Promise<VideoInfo> => {
     if (!url) {
-      throw createApiError(400, 'URL is required');
+      throw new ApiError(400, 'URL is required');
     }
 
-    // Simulate API delay
-    await delay(1500);
+    try {
+      const response = await fetch(`${API_BASE_URL}/videos/fetch-info`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ url })
+      });
 
-    // Simulate random failure
-    if (simulateRandomFailure(0.1)) {
-      throw createApiError(500, 'Failed to fetch video information. Please try again.');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new ApiError(response.status, errorData.detail || 'Failed to fetch video information');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(500, 'An unexpected error occurred while fetching video information');
     }
-
-    // Generate mock video info based on the URL
-    return generateMockVideoInfo(url);
   },
 
   // Download a video
-  downloadVideo: async (videoId: string, formatId: string): Promise<UserDownload> => {
+  downloadVideo: async (videoId: string, formatId: string) => {
     const token = getAuthToken();
     
-    // Check authentication for tracking downloads
-    let user = getCurrentUser();
-    
-    // Simulate API delay
-    await delay(2000);
+    try {
+      const response = await fetch(`${API_BASE_URL}/videos/download`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ videoId, formatId, token })
+      });
 
-    // Simulate random failure
-    if (simulateRandomFailure(0.15)) {
-      throw createApiError(500, 'Download failed. Please try again.');
-    }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new ApiError(response.status, errorData.detail || 'Download failed');
+      }
 
-    // If user is authenticated, save this download to their history
-    if (token && user) {
-      // Get the video info (in a real app we would check if we already have it)
-      const videoUrl = localStorage.getItem(`video_${videoId}_url`);
+      const data = await response.json();
       
-      if (!videoUrl) {
-        throw createApiError(404, 'Video not found');
+      // In a real app this would trigger file download
+      // For now, we'll just return the data
+      return data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
       }
-
-      const videoInfo = await videoService.fetchVideoInfo(videoUrl);
-      
-      // Find the format
-      const format = videoInfo.availableFormats.find(fmt => fmt.id === formatId);
-      
-      if (!format) {
-        throw createApiError(404, 'Format not found');
-      }
-
-      // Check download limits for plans
-      if (user.plan === 'Free' && user.downloads.length >= 5) {
-        throw createApiError(403, 'Free plan limited to 5 downloads per day. Please upgrade your plan.');
-      }
-
-      if (user.plan === 'Pro' && user.downloads.length >= 30) {
-        throw createApiError(403, 'Pro plan limited to 30 downloads per day. Please upgrade to Unlimited for more downloads.');
-      }
-
-      // Check quality limits for plans
-      const qualityRanking: Record<string, number> = {
-        '240p': 1,
-        '360p': 2,
-        '480p': 3,
-        '720p': 4,
-        '1080p': 5,
-        '2K': 6,
-        '4K': 7
-      };
-
-      if (user.plan === 'Free' && qualityRanking[format.quality] > qualityRanking['720p']) {
-        throw createApiError(403, 'Free plan limited to 720p quality. Please upgrade your plan for higher quality downloads.');
-      }
-
-      if (user.plan === 'Pro' && qualityRanking[format.quality] > qualityRanking['1080p']) {
-        throw createApiError(403, 'Pro plan limited to 1080p quality. Please upgrade to Unlimited for 4K downloads.');
-      }
-
-      // Create download record
-      const downloadRecord: UserDownload = {
-        id: `dl-${Date.now()}`,
-        videoInfo,
-        downloadDate: new Date().toISOString(),
-        format,
-        status: 'completed'
-      };
-
-      // Update user's download history
-      user.downloads = [downloadRecord, ...user.downloads];
-      user.downloadCount += 1;
-      saveCurrentUser(user);
-
-      return downloadRecord;
+      throw new ApiError(500, 'An unexpected error occurred during download');
     }
-
-    // For anonymous users, just return a fake download record
-    const videoUrl = localStorage.getItem(`video_${videoId}_url`);
-    if (!videoUrl) {
-      throw createApiError(404, 'Video not found');
-    }
-
-    const videoInfo = await videoService.fetchVideoInfo(videoUrl);
-    const format = videoInfo.availableFormats.find(fmt => fmt.id === formatId);
-    
-    if (!format) {
-      throw createApiError(404, 'Format not found');
-    }
-
-    // For free users, check quality limit
-    if (format.quality !== '240p' && format.quality !== '360p' && format.quality !== '480p' && format.quality !== '720p') {
-      throw createApiError(403, 'Free users can only download up to 720p quality. Please sign up for higher quality downloads.');
-    }
-    
-    return {
-      id: `dl-${Date.now()}`,
-      videoInfo,
-      downloadDate: new Date().toISOString(),
-      format,
-      status: 'completed'
-    };
   },
 
   // Get user downloads
-  getUserDownloads: async (): Promise<UserDownload[]> => {
+  getUserDownloads: async () => {
     const token = getAuthToken();
     
     if (!token) {
-      throw createApiError(401, 'Not authenticated');
+      throw new ApiError(401, 'Not authenticated');
     }
 
-    // Simulate API delay
-    await delay(1000);
+    try {
+      const response = await fetch(`${API_BASE_URL}/videos/history?token=${token}`, {
+        headers: getCommonHeaders()
+      });
 
-    const user = getCurrentUser();
-    if (!user) {
-      throw createApiError(404, 'User not found');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new ApiError(response.status, errorData.detail || 'Failed to fetch download history');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(500, 'An unexpected error occurred while fetching download history');
     }
-
-    return user.downloads;
   }
 };

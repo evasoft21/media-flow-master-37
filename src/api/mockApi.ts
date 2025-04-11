@@ -1,5 +1,4 @@
 
-import React from 'react';
 import { authService } from './services/authService';
 import { videoService } from './services/videoService';
 import { adminService } from './services/adminService';
@@ -34,7 +33,7 @@ export const api = {
   // Settings services
   ...settingsService,
   
-  // Mock data services (previously direct imports)
+  // Mock data services (these now connect to the real API)
   getPlatforms: mockDataService.getPlatforms,
   getFeatures: mockDataService.getFeatures,
   getPricingPlans: mockDataService.getPricingPlans,

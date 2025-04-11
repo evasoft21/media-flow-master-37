@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   name: string;
@@ -17,6 +18,7 @@ export interface DownloadRecord {
   fileSize: string;
   resolution: string;
   format: string;
+  status?: string;
 }
 
 export interface SubscriptionPlan {
@@ -29,6 +31,8 @@ export interface SubscriptionPlan {
   isRecommended?: boolean;
   createdAt: string;
   updatedAt: string;
+  isActive?: boolean;
+  billingCycle?: "monthly" | "annually";
 }
 
 export interface Invoice {
@@ -41,6 +45,8 @@ export interface Invoice {
   currency: string;
   createdAt: string;
   status: 'Paid' | 'Pending' | 'Failed';
+  paymentMethod?: string;
+  transactionId?: string;
 }
 
 export interface AdminStats {
@@ -83,14 +89,18 @@ export interface AuthResponse {
 }
 
 export interface VideoInfo {
+  id: string;
   title: string;
   author: string;
   duration: number;
   thumbnail: string;
   formats: VideoFormat[];
+  platform?: string;
+  viewCount?: number;
 }
 
 export interface VideoFormat {
+  id: string;
   format: string;
   quality: string;
   url: string;
@@ -187,4 +197,30 @@ export interface StripeConfig {
   collectBillingAddress: boolean;
   collectShippingAddress: boolean;
   lastUpdated: string;
+}
+
+export interface LegalDocument {
+  title: string;
+  content: string;
+  lastUpdated: string;
+}
+
+export interface PaymentSession {
+  id: string;
+  customerId: string;
+  customerEmail: string;
+  amount: number;
+  currency: string;
+  status: string;
+  createdAt: string;
+  paymentMethod: string;
+  planId: string;
+}
+
+export interface UserDownload {
+  id: string;
+  videoInfo: VideoInfo;
+  downloadDate: string;
+  format: VideoFormat;
+  status: string;
 }
