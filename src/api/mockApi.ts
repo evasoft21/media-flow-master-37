@@ -7,6 +7,7 @@ import { configService } from './services/configService';
 import { legalService } from './services/legalService';
 import { paymentService } from './services/paymentService';
 import { mockDataService } from './services/mockDataService';
+import { settingsService } from './services/settingsService';
 import { isAuthenticated } from './utils/storageHelpers';
 import { useApiRequest } from './hooks/useApiRequest';
 
@@ -29,6 +30,9 @@ export const api = {
   
   // Payment services
   ...paymentService,
+  
+  // Settings services
+  ...settingsService,
   
   // Mock data services (previously direct imports)
   getPlatforms: mockDataService.getPlatforms,

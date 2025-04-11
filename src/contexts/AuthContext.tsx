@@ -8,7 +8,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<boolean>;
   signup: (email: string, password: string, confirmPassword: string, name?: string) => Promise<boolean>;
   logout: () => Promise<void>;
 }
@@ -41,10 +41,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkAuthStatus();
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string, rememberMe: boolean = false): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const response = await api.loginUser({ email, password });
+      const response = await api.loginUser({ email, password, rememberMe });
       setUser(response.user);
       return true;
     } catch (error) {

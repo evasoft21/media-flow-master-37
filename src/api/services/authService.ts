@@ -25,7 +25,7 @@ export const authService = {
 
     // Create mock token
     const token = `mock-jwt-token-${Date.now()}`;
-    saveAuthToken(token);
+    saveAuthToken(token, credentials.rememberMe);
     saveCurrentUser(mockUser);
 
     return {
