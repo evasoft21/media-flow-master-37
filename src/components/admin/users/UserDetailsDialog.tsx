@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 import { useApiRequest } from '@/api/hooks/useApiRequest';
 import { api } from '@/api/mockApi';
-import { type User } from '@/types/api';
+import { type User, type DownloadRecord } from '@/types/api';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 
@@ -87,13 +87,13 @@ export const UserDetailsDialog: React.FC<UserDetailsDialogProps> = ({ userId }) 
               <h4 className="font-medium mb-2">Recent Downloads</h4>
               {user.downloads && user.downloads.length > 0 ? (
                 <div className="border rounded-md divide-y">
-                  {user.downloads.slice(0, 3).map((download, idx) => (
+                  {user.downloads.slice(0, 3).map((download: DownloadRecord, idx) => (
                     <div key={idx} className="p-2 text-sm">
-                      <div className="font-medium">{download.videoInfo.title}</div>
+                      <div className="font-medium">{download.videoUrl.split('/').pop() || 'Unknown'}</div>
                       <div className="text-xs text-muted-foreground">
                         {format(new Date(download.downloadDate), 'MMM d, yyyy')} • 
-                        {download.format.quality} • 
-                        {download.status}
+                        {download.resolution} • 
+                        {download.status || 'Unknown'}
                       </div>
                     </div>
                   ))}

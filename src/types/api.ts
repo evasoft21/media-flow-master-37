@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   name: string;
@@ -223,4 +222,17 @@ export interface UserDownload {
   downloadDate: string;
   format: VideoFormat;
   status: string;
+}
+
+export interface PricingPlan {
+  id: string;
+  name: string;
+  price: string;
+  billingPeriod: string;
+  description: string;
+  features: string[];
+  isPopular?: boolean;
+  downloadLimit: number | string;
+  qualityLimit: string;
+  platformLimit?: string;
 }

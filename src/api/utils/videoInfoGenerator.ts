@@ -1,8 +1,11 @@
 
-import { type Platform, type VideoInfo, type VideoQuality } from "@/types/api";
+import { type VideoInfo } from "@/types/api";
+
+// Define VideoQuality type locally since it's not in the API types
+type VideoQuality = '240p' | '360p' | '480p' | '720p' | '1080p' | '2K' | '4K';
 
 // Platform-specific mock thumbnails
-const platformThumbnails: Record<Platform, string> = {
+const platformThumbnails: Record<string, string> = {
   'YouTube': 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
   'TikTok': 'https://i.pinimg.com/originals/c9/6b/6e/c96b6e549899b7155e86d31b3c3b747c.jpg',
   'Facebook': 'https://cdn.pixabay.com/photo/2021/02/08/15/38/social-media-5995266_960_720.jpg',
@@ -12,7 +15,7 @@ const platformThumbnails: Record<Platform, string> = {
 };
 
 // Platform-specific mock titles
-const platformTitles: Record<Platform, string[]> = {
+const platformTitles: Record<string, string[]> = {
   'YouTube': [
     'Ultimate Guide to Modern Web Development',
     'The Best Tech Review of 2023',
@@ -47,7 +50,7 @@ const platformTitles: Record<Platform, string[]> = {
 
 // Mock Video Data Generator
 export const generateMockVideoInfo = (url: string): VideoInfo => {
-  const platformMap: Record<string, Platform> = {
+  const platformMap: Record<string, string> = {
     'youtube': 'YouTube',
     'youtu.be': 'YouTube',
     'tiktok': 'TikTok',
@@ -59,7 +62,7 @@ export const generateMockVideoInfo = (url: string): VideoInfo => {
   };
 
   // Detect platform from URL
-  let detectedPlatform: Platform = 'YouTube';
+  let detectedPlatform = 'YouTube';
   for (const [urlPart, platform] of Object.entries(platformMap)) {
     if (url.includes(urlPart)) {
       detectedPlatform = platform;
@@ -71,25 +74,25 @@ export const generateMockVideoInfo = (url: string): VideoInfo => {
   const randomId = Math.random().toString(36).substring(2, 10);
 
   // Select a random title for the platform
-  const titles = platformTitles[detectedPlatform];
+  const titles = platformTitles[detectedPlatform] || platformTitles['YouTube'];
   const randomTitle = titles[Math.floor(Math.random() * titles.length)];
 
   // Generate random durations
   const minutes = Math.floor(Math.random() * 30) + 1;
   const seconds = Math.floor(Math.random() * 60);
   const paddedSeconds = seconds.toString().padStart(2, '0');
-  const duration = `${minutes}:${paddedSeconds}`;
+  const duration = minutes * 60 + seconds; // Convert to seconds for the API
 
   // Mock formats based on platform and random availability
   const formats = [
-    { id: `fmt1-${randomId}`, label: '240p', quality: '240p' as VideoQuality, format: 'MP4', fileSize: '10 MB' },
-    { id: `fmt2-${randomId}`, label: '360p', quality: '360p' as VideoQuality, format: 'MP4', fileSize: '20 MB' },
-    { id: `fmt3-${randomId}`, label: '480p', quality: '480p' as VideoQuality, format: 'MP4', fileSize: '40 MB' },
-    { id: `fmt4-${randomId}`, label: '720p', quality: '720p' as VideoQuality, format: 'MP4', fileSize: '80 MB' },
-    { id: `fmt5-${randomId}`, label: '1080p', quality: '1080p' as VideoQuality, format: 'MP4', fileSize: '160 MB' },
-    { id: `fmt6-${randomId}`, label: '2K', quality: '2K' as VideoQuality, format: 'MP4', fileSize: '300 MB' },
-    { id: `fmt7-${randomId}`, label: '4K', quality: '4K' as VideoQuality, format: 'MP4', fileSize: '600 MB' },
-    { id: `fmt8-${randomId}`, label: 'MP3 Audio', quality: '240p' as VideoQuality, format: 'MP3', fileSize: '5 MB' }
+    { id: `fmt1-${randomId}`, format: 'MP4', quality: '240p', url: `https://example.com/video-240p-${randomId}.mp4`, fileSize: '10 MB' },
+    { id: `fmt2-${randomId}`, format: 'MP4', quality: '360p', url: `https://example.com/video-360p-${randomId}.mp4`, fileSize: '20 MB' },
+    { id: `fmt3-${randomId}`, format: 'MP4', quality: '480p', url: `https://example.com/video-480p-${randomId}.mp4`, fileSize: '40 MB' },
+    { id: `fmt4-${randomId}`, format: 'MP4', quality: '720p', url: `https://example.com/video-720p-${randomId}.mp4`, fileSize: '80 MB' },
+    { id: `fmt5-${randomId}`, format: 'MP4', quality: '1080p', url: `https://example.com/video-1080p-${randomId}.mp4`, fileSize: '160 MB' },
+    { id: `fmt6-${randomId}`, format: 'MP4', quality: '2K', url: `https://example.com/video-2k-${randomId}.mp4`, fileSize: '300 MB' },
+    { id: `fmt7-${randomId}`, format: 'MP4', quality: '4K', url: `https://example.com/video-4k-${randomId}.mp4`, fileSize: '600 MB' },
+    { id: `fmt8-${randomId}`, format: 'MP3', quality: '240p', url: `https://example.com/audio-${randomId}.mp3`, fileSize: '5 MB' }
   ];
 
   // Randomize format availability based on platform
@@ -103,16 +106,17 @@ export const generateMockVideoInfo = (url: string): VideoInfo => {
     availableFormats = formats.slice(0, formatCount);
   }
 
+  // Generate random view count
+  const viewCount = Math.floor(Math.random() * 1000000);
+
   return {
     id: randomId,
-    url: url,
     title: randomTitle,
-    description: 'This is a mock description for the video. In a real application, this would contain actual details about the video content.',
-    thumbnailUrl: platformThumbnails[detectedPlatform],
-    platform: detectedPlatform,
     author: 'Content Creator',
     duration: duration,
-    viewCount: `${Math.floor(Math.random() * 1000000).toLocaleString()} views`,
-    availableFormats: availableFormats
+    thumbnail: platformThumbnails[detectedPlatform] || platformThumbnails['YouTube'],
+    formats: availableFormats,
+    platform: detectedPlatform,
+    viewCount: viewCount
   };
 };

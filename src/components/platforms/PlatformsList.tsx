@@ -3,8 +3,8 @@ import { platforms } from '@/api/mockData';
 import { Youtube, Facebook, Video, Music, Twitter, Image } from 'lucide-react';
 
 export const PlatformsList = () => {
-  const getPlatformIcon = (platform: string) => {
-    switch (platform) {
+  const getPlatformIcon = (platformName: string) => {
+    switch (platformName) {
       case 'YouTube':
         return <Youtube className="h-6 w-6 text-red-500" />;
       case 'Facebook':
@@ -28,11 +28,11 @@ export const PlatformsList = () => {
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
         {platforms.map((platform) => (
           <div
-            key={platform}
+            key={platform.id}
             className="flex flex-col items-center justify-center p-4 rounded-lg bg-card/50 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all card-hover"
           >
-            {getPlatformIcon(platform)}
-            <span className="mt-2 text-sm font-medium">{platform}</span>
+            {getPlatformIcon(platform.name)}
+            <span className="mt-2 text-sm font-medium">{platform.name}</span>
           </div>
         ))}
       </div>

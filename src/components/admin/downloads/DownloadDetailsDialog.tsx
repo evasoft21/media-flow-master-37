@@ -72,13 +72,14 @@ export const DownloadDetailsDialog: React.FC<DownloadDetailsDialogProps> = ({ do
               <div>{download.userName}</div>
               
               <div className="font-medium text-muted-foreground">Video Title:</div>
-              <div>{download.videoTitle}</div>
+              <div>{download.videoUrl.split('/').pop() || 'Unknown'}</div>
               
               <div className="font-medium text-muted-foreground">Platform:</div>
-              <div>{download.platform}</div>
+              <div>{download.videoUrl.includes('youtube') ? 'YouTube' : 
+                    download.videoUrl.includes('facebook') ? 'Facebook' : 'Other'}</div>
               
               <div className="font-medium text-muted-foreground">Quality:</div>
-              <div>{download.quality}</div>
+              <div>{download.resolution}</div>
               
               <div className="font-medium text-muted-foreground">File Size:</div>
               <div>{download.fileSize}</div>
@@ -86,7 +87,7 @@ export const DownloadDetailsDialog: React.FC<DownloadDetailsDialogProps> = ({ do
               <div className="font-medium text-muted-foreground">Status:</div>
               <div>
                 <Badge variant={download.status === 'completed' ? 'default' : 'destructive'}>
-                  {download.status}
+                  {download.status || 'Unknown'}
                 </Badge>
               </div>
               
